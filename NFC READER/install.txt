@@ -1,0 +1,136 @@
+A. installation du module python nxppy et de ses dépendances.
+
+  1. mettre à jours le raspberry
+     sudo apt-get update
+
+  2. installer les packages necessaire pour le module nfc(nxppy).
+     sudo apt-get install build-essential cmake unzip wget
+
+  3. installer le module dev de python.
+     verifier la version de python
+       python --version   
+     si c'est une version 2.....
+       sudo apt-get install python-dev 
+     Si c'est une version 3....
+       sudo apt-get install python3-dev 
+
+  4. installer le module pour le lecteur nfc
+      python -m pip install nxppy
+
+______________________________________________________________________________________________
+
+B. configuration du reseau du Raspberry
+    rappel : on a 2 cartes reseaux : une pour communiquer avec internet, la deuxieme pour commander les led.
+    wlan0 = reseau internet => client dhcp
+    wlan1 = reseau interne(pour les led) => serveur dhcp
+
+disable forward ip : the internal lan must'nt connect to internet
+
+1.installation du module dhcp serveur 
+    sudo apt-get install udhcpd
+    je sauvegarde la conf standard.
+    sudo cp -p  /etc/udhcpd.conf /etc/udhcpd.conf.bk.std
+    sudo su -c "/bin/echo >/etc/udhcpd.conf"
+
+
+    sudo vi /etc/udhcpd.conf
+      mettre les lignes ci-dessous dans le fichier /etc/udhcpd.conf. celui-ci doit etre vide.
+      configure
+      ### pascal
+      start 192.168.10.20 # This is the range of IPs that the hostspot will give to client devices.
+      end 192.168.10.30
+      interface wlan1 # The device uDHCP listens on.
+      remaining yes
+      ###pascal  : commenter : 
+      #opt dns 8.8.8.8 4.2.2.2 # The DNS servers client devices will use.
+      #opt subnet 255.255.255.0
+      #opt router 192.168.42.1 # The Pi's IP address on wlan0 which we will set up shortly.
+      ### non commenté à l'origine.
+      opt lease 864000 # 10 day DHCP lease time in seconds
+
+2. dans le fichier /etc/default/udhcpd il faut commenter la ligne DHCPD_ENABLED="no"
+    sudo vi /etc/default/udhcpd
+    #DHCPD_ENABLED="no"
+
+3. installation du point d'accés wifi.
+    sudo apt-get install hostapd  
+
+4. désactivé dhcp sur wlan0 (reseau )
+    dhcpd.conf gére la configuration du client dhcp.
+    il faut donc lui dire de ne pas demander d'ip pour le wlan1 qui est en fait un serveur dhcp.
+    sudo vi /etc/dhcpcd.conf
+      ## ADDLAB add the line
+      ## ADDLAB this line disable dhcp on wlan1 interface
+      denyinterfaces wlan1 
+
+5. dire à hostapd de lire le fichier de conf /etc/hostapd/hostapd.conf
+    ajouter la ligne "DAEMON_CONF=..." au fichier.
+    sudo vi  /etc/default/hostapd
+    DAEMON_CONF="/etc/hostapd/hostapd.conf"
+
+6. Créer le fichier "/etc/hostapd/hostapd.conf" en y mettant les lignes ci-dessous.
+    sudo vi  /etc/hostapd/hostapd.conf
+
+      # This is the name of the WiFi interface we configured above, this interface will be access point.
+      interface=wlan1
+      # Use the nl80211 driver with the brcmfmac driver
+      driver=nl80211
+      # This is the name of the network
+      ssid=ADDLAB-PI3-AP
+      # Use the 2.4GHz band
+      hw_mode=g
+      # Use channel 6
+      channel=6
+      # Enable 802.11n
+      ieee80211n=1
+      # Enable WMM
+      wmm_enabled=1
+      # Enable 40MHz channels with 20ns guard interval
+      ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]
+      # Accept all MAC addresses
+      macaddr_acl=0
+      # Use WPA authentication
+      auth_algs=1
+      # Require clients to know the network name
+      ignore_broadcast_ssid=0
+      # Use WPA2
+      wpa=2
+      # Use a pre-shared key
+      wpa_key_mgmt=WPA-PSK
+      # The network passphrase
+      wpa_passphrase=raspberry
+      # Use AES, instead of TKIP
+      rsn_pairwise=CCMP 
+
+7. configuration de l'interface wlan1 
+    dans le fichier /etc/network/interfaces commenter les lignes concernant l'interface wlan1 
+    et ajouter les ligne ci-dessous (celles non commentées).
+    commenter les lignes comme ci-dessous si elles sont présentes.
+    sudo nano /etc/network/interfaces
+        allow-hotplug wlan1
+        iface wlan1 inet static
+        address 192.168.10.1
+        netmask 255.255.255.0
+        wireless-power off
+        #iface wlan1 inet manual
+        #    wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+        
+8. Important arrêt interface wlan1, si elle n'est pas arréte, hostapd ne pourra pas l'utiliser.
+    sudo ifdown wlan1
+    
+9. tester hostapd 
+    sudo /usr/sbin/hostapd  /etc/hostapd/hostapd.conf
+        root@raspberrypi:~#  sudo /usr/sbin/hostapd  /etc/hostapd/hostapd.conf
+        Configuration file: /etc/hostapd/hostapd.conf
+        Using interface wlan1 with hwaddr 40:a5:ef:0f:4d:e5 and ssid "PiFi"
+        wlan1: interface state UNINITIALIZED->ENABLED
+        wlan1: AP-ENABLED
+        ....
+
+    si tu as cela  c'est que l'interface wlan1 n'est pas arretée
+    root@raspberrypi:~#  sudo /usr/sbin/hostapd  /etc/hostapd/hostapd.conf
+       Configuration file: /etc/hostapd/hostapd.conf
+       nl80211: Could not configure driver mode
+       nl80211 driver initialization failed.
+       hostapd_free_hapd_data: Interface wlan1 wasn't started
+        
