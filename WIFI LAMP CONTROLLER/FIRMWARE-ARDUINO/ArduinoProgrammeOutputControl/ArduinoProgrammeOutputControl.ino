@@ -10,9 +10,9 @@ void setup() {
   Serial.begin(9600);
   
   
-  for (int pinLed=3;pinLed<20;pinLed++){
+  for (int pinLed=2;pinLed<20;pinLed++){
        pinMode(pinLed,OUTPUT);
-       digitalWrite(pinLed,LOW);
+       digitalWrite(pinLed,HIGH);
       }
  
 
@@ -26,8 +26,8 @@ void loop() {
   action = Serial.readString();
 
   //------------------ Action led individuelles
-  
-  if (action.length()==10){ // Pour les actions /leds/01/0
+
+  if (action.length()==12){ // Pour les actions /leds/01/0
     
     ledDizaine = action[6];
     ledUnite = action[7];
@@ -35,7 +35,7 @@ void loop() {
     numeroLed = (ledDizaine.toInt())*10 + (ledUnite.toInt());
     numeroLed=numeroLed-1; //car on part de la sortie led 2 cablé sur le 3
 
-    etat = (String(action[9])).toInt();
+    etat = !(String(action[9])).toInt();
 
     digitalWrite(numeroLed,etat);
     
@@ -43,11 +43,10 @@ void loop() {
 
    //------------------ Action led collectives
   
-  else if(action.length()==11){ //Pour les actions /leds/all/1
+  else if(action.length()==13){ //Pour les actions /leds/all/1
     
-    etat = (String(action[10])).toInt();
-    for (int i=2;i<20;i++){
-      numeroLed=i-1; ///car on part de la sortie led 2 cablé sur le 3
+    etat = !(String(action[10])).toInt();
+    for (int numeroLed=2;numeroLed<20;numeroLed++){
       digitalWrite(numeroLed,etat);
       }
     }
@@ -62,4 +61,3 @@ void loop() {
    }
    
 }
-
