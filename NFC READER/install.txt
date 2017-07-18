@@ -16,7 +16,14 @@ A. installation du module python nxppy et de ses dépendances.
 
   4. installer le module pour le lecteur nfc en root
       sudo python -m pip install nxppy
-
+  
+  5. configurer l'interface SPI sur le raspberry :
+     aller dans "Preferences" => "Configuration du raspberry PI" 
+     aller dans l'onglet "Interfaces"
+     activer l'interface SPI
+     
+     si tu n'actives pas l'interface SPI tu pourrais avoir 
+       - une erreur du type NXPPY......
 ______________________________________________________________________________________________
 
 B. configuration du reseau du Raspberry
@@ -128,6 +135,7 @@ disable forward ip : the internal lan must'nt connect to internet
         wlan1: AP-ENABLED
         ....
 Faire Ctrl+c pour quitter
+
     si tu as cela  c'est que l'interface wlan1 n'est pas arretée
     root@raspberrypi:~#  sudo /usr/sbin/hostapd  /etc/hostapd/hostapd.conf
        Configuration file: /etc/hostapd/hostapd.conf
@@ -135,3 +143,4 @@ Faire Ctrl+c pour quitter
        nl80211 driver initialization failed.
        hostapd_free_hapd_data: Interface wlan1 wasn't started
         
+             
