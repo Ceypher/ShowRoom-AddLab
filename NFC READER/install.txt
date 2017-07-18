@@ -86,7 +86,8 @@ disable forward ip : the internal lan must'nt connect to internet
       # Enable WMM
       wmm_enabled=1
       # Enable 40MHz channels with 20ns guard interval
-      ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]
+      # Si carte WiPI la ligne suivante doit etre commentee
+      # ht_capab=[HT40][SHORT-GI-20][DSSS_CCK-40]
       # Accept all MAC addresses
       macaddr_acl=0
       # Use WPA authentication
@@ -126,7 +127,7 @@ disable forward ip : the internal lan must'nt connect to internet
         wlan1: interface state UNINITIALIZED->ENABLED
         wlan1: AP-ENABLED
         ....
-
+Faire Ctrl+c pour quitter
     si tu as cela  c'est que l'interface wlan1 n'est pas arretée
     root@raspberrypi:~#  sudo /usr/sbin/hostapd  /etc/hostapd/hostapd.conf
        Configuration file: /etc/hostapd/hostapd.conf
