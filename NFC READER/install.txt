@@ -99,7 +99,7 @@ disable forward ip : the internal lan must'nt connect to internet
       # Use a pre-shared key
       wpa_key_mgmt=WPA-PSK
       # The network passphrase
-      wpa_passphrase=oxyRaspberry
+      wpa_passphrase=replace by the good password
       # Use AES, instead of TKIP
       rsn_pairwise=CCMP 
 
