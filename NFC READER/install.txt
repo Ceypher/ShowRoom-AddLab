@@ -14,7 +14,7 @@ A. installation du module python nxppy et de ses dépendances.
      Si c'est une version 3....
        sudo apt-get install python3-dev 
 
-  4. installer le module pour le lecteur nfc
+  4. installer le module pour le lecteur nfc en root
       python -m pip install nxppy
 
 ______________________________________________________________________________________________
